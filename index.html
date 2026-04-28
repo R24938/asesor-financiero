@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NexWealth — Inversiones Inteligentes</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════
+       SCREEN 1 — AUTH
+  ═══════════════════════════════════════════════ -->
+  <div id="screen-auth" class="screen active">
+    <div class="auth-bg">
+      <div class="auth-grid-overlay"></div>
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+    </div>
+
+    <div class="auth-container">
+      <!-- Brand -->
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <path d="M14 2L26 8V20L14 26L2 20V8L14 2Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+            <path d="M14 7L21 11V17L14 21L7 17V11L14 7Z" fill="currentColor" opacity="0.3"/>
+            <circle cx="14" cy="14" r="3" fill="currentColor"/>
+          </svg>
+        </div>
+        <span class="brand-name">NexWealth</span>
+      </div>
+
+      <!-- Card -->
+      <div class="auth-card">
+        <!-- Tabs -->
+        <div class="auth-tabs">
+          <button class="auth-tab active" data-tab="login">Iniciar sesión</button>
+          <button class="auth-tab" data-tab="register">Registro</button>
+        </div>
+
+        <!-- Login Form -->
+        <div id="form-login" class="auth-form active">
+          <div class="form-group">
+            <label>Correo electrónico</label>
+            <input type="email" id="login-email" placeholder="tu@email.com" autocomplete="email" />
+          </div>
+          <div class="form-group">
+            <label>Contraseña</label>
+            <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password" />
+          </div>
+          <div id="login-error" class="form-error hidden"></div>
+          <button class="btn-primary" id="btn-login">Entrar a mi cuenta</button>
+          <p class="auth-hint">¿No tienes cuenta? <a href="#" data-switch="register">Regístrate gratis</a></p>
+        </div>
+
+        <!-- Register Form -->
+        <div id="form-register" class="auth-form">
+          <div class="form-group">
+            <label>Nombre completo</label>
+            <input type="text" id="reg-name" placeholder="Tu nombre" autocomplete="name" />
+          </div>
+          <div class="form-group">
+            <label>Correo electrónico</label>
+            <input type="email" id="reg-email" placeholder="tu@email.com" autocomplete="email" />
+          </div>
+          <div class="form-group">
+            <label>Contraseña</label>
+            <input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres" autocomplete="new-password" />
+          </div>
+          <div id="reg-error" class="form-error hidden"></div>
+          <button class="btn-primary" id="btn-register">Crear cuenta</button>
+          <p class="auth-hint">¿Ya tienes cuenta? <a href="#" data-switch="login">Inicia sesión</a></p>
+        </div>
+      </div>
+
+      <p class="auth-footer">Simulación educativa. No constituye asesoría financiera real.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       SCREEN 2 — INVEST INPUT
+  ═══════════════════════════════════════════════ -->
+  <div id="screen-invest" class="screen">
+    <!-- Nav -->
+    <nav class="app-nav">
+      <div class="brand small">
+        <div class="brand-icon small">
+          <svg width="20" height="20" viewBox="0 0 28 28" fill="none">
+            <path d="M14 2L26 8V20L14 26L2 20V8L14 2Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+            <circle cx="14" cy="14" r="3" fill="currentColor"/>
+          </svg>
+        </div>
+        <span class="brand-name">NexWealth</span>
+      </div>
+      <div class="nav-right">
+        <span id="nav-user" class="nav-user"></span>
+        <button id="btn-logout" class="btn-ghost">Salir</button>
+      </div>
+    </nav>
+
+    <div class="invest-container">
+      <div class="invest-hero">
+        <div class="hero-badge">Motor de inversión IA</div>
+        <h1 class="hero-title">¿Cuánto deseas<br/><em>invertir hoy?</em></h1>
+        <p class="hero-sub">Nuestro algoritmo distribuirá tu capital de forma óptima entre acciones y ahorro de alto rendimiento.</p>
+      </div>
+
+      <div class="invest-card">
+        <div class="amount-input-wrap">
+          <span class="currency-symbol">$</span>
+          <input type="number" id="invest-amount" placeholder="0.00" min="1" step="0.01" />
+          <span class="currency-label">USD</span>
+        </div>
+
+        <div class="quick-amounts">
+          <button class="quick-btn" data-amount="500">$500</button>
+          <button class="quick-btn" data-amount="1000">$1,000</button>
+          <button class="quick-btn" data-amount="5000">$5,000</button>
+          <button class="quick-btn" data-amount="10000">$10,000</button>
+          <button class="quick-btn" data-amount="50000">$50,000</button>
+        </div>
+
+        <div id="invest-error" class="form-error hidden"></div>
+
+        <button class="btn-primary large" id="btn-calculate">
+          <span>Calcular mi portafolio</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+
+      <!-- Stock Ticker Preview -->
+      <div class="ticker-wrap">
+        <div class="ticker-track" id="ticker-track"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       SCREEN 3 — DASHBOARD
+  ═══════════════════════════════════════════════ -->
+  <div id="screen-dashboard" class="screen">
+    <nav class="app-nav">
+      <div class="brand small">
+        <div class="brand-icon small">
+          <svg width="20" height="20" viewBox="0 0 28 28" fill="none">
+            <path d="M14 2L26 8V20L14 26L2 20V8L14 2Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+            <circle cx="14" cy="14" r="3" fill="currentColor"/>
+          </svg>
+        </div>
+        <span class="brand-name">NexWealth</span>
+      </div>
+      <div class="nav-right">
+        <button id="btn-recalculate" class="btn-ghost">← Recalcular</button>
+        <button id="btn-logout-2" class="btn-ghost">Salir</button>
+      </div>
+    </nav>
+
+    <div class="dashboard-container">
+
+      <!-- Header Summary -->
+      <div class="dash-header">
+        <div>
+          <p class="dash-label">Capital a invertir</p>
+          <h2 class="dash-total" id="dash-total">$0.00</h2>
+        </div>
+        <div class="dash-split-badges">
+          <div class="split-badge equity">
+            <span class="split-pct">60%</span>
+            <span class="split-label">Renta Variable</span>
+          </div>
+          <div class="split-badge savings">
+            <span class="split-pct">40%</span>
+            <span class="split-label">Ahorro APY</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Grid -->
+      <div class="dash-grid">
+
+        <!-- LEFT: Chart + Portfolio -->
+        <div class="dash-col-left">
+
+          <!-- Donut Chart -->
+          <div class="card chart-card">
+            <h3 class="card-title">Distribución del portafolio</h3>
+            <div class="chart-wrap">
+              <canvas id="donut-chart"></canvas>
+              <div class="chart-legend" id="chart-legend"></div>
+            </div>
+          </div>
+
+          <!-- Stock Cards -->
+          <div class="card stocks-card">
+            <h3 class="card-title">Portafolio de acciones <span class="badge-60">60% — <span id="equity-amount"></span></span></h3>
+            <div id="stocks-list" class="stocks-list"></div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT: Savings + Banks -->
+        <div class="dash-col-right">
+
+          <!-- Savings Card -->
+          <div class="card savings-card">
+            <div class="savings-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 6v6l4 2"/></svg>
+            </div>
+            <h3 class="card-title">Cuenta de Ahorro de Alto Rendimiento</h3>
+            <div class="savings-amount" id="savings-amount">$0.00</div>
+            <p class="savings-sub">40% de tu capital generando intereses compuestos</p>
+            <div class="savings-projection" id="savings-projection"></div>
+          </div>
+
+          <!-- Banks Comparison -->
+          <div class="card banks-card">
+            <h3 class="card-title">Comparativa bancaria — Mejores APY</h3>
+            <div class="banks-table-wrap">
+              <table class="banks-table" id="banks-table">
+                <thead>
+                  <tr>
+                    <th>Banco</th>
+                    <th>APY</th>
+                    <th>Ganancia / año</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="banks-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Tips Card -->
+          <div class="card tips-card">
+            <h3 class="card-title">💡 Consejo personalizado</h3>
+            <p id="tip-text" class="tip-text"></p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
