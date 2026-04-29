@@ -187,8 +187,8 @@ function handleRegister() {
 
 function loginSuccess(user) {
   currentUser = user;
-  $('nav-user').textContent = `👤 ${user.name.split(' ')[0]}`;
-  initInvestScreen();
+  $('nav-user').textContent     = `👤 ${user.name.split(' ')[0]}`;
+  $('nav-user-2').textContent   = `👤 ${user.name.split(' ')[0]}`;
   showScreen('screen-invest');
 }
 
@@ -635,4 +635,7 @@ function renderChart(equityAlloc, savingsBudget, totalCLP, perfil) {
 /* ─────────────────────────────────────────────────
    INIT
 ───────────────────────────────────────────────── */
-document.addEventListener('DOMContentLoaded', initAuth);
+document.addEventListener('DOMContentLoaded', () => {
+  initInvestScreen(); // registra listeners UNA sola vez
+  initAuth();
+});
