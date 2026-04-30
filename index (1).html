@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NexWealth — Asesor Financiero</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --n950:#060d1a; --n900:#0b1628; --n800:#0f2040; --n700:#162d57; --n600:#1e3d6e;
+  --b500:#2563eb; --b400:#3b82f6; --b300:#93c5fd;
+  --e500:#10b981; --e400:#34d399; --e300:#6ee7b7;
+  --a300:#fcd34d; --r400:#fb7185;
+  --s300:#cbd5e1; --s400:#94a3b8; --s500:#64748b; --s600:#475569;
+  --card:rgba(15,32,64,.75); --cborder:rgba(59,130,246,.18);
+  --fd:'Segoe UI',system-ui,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--fd);background:var(--n950);color:#fff;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+.screen{display:none;min-height:100vh}
+.screen.active{display:block}
+.hidden{display:none!important}
+
+/* ── AUTH BG ── */
+.auth-bg{position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 50% -10%,#162d57,#060d1a);z-index:0;overflow:hidden}
+.grid-ov{position:absolute;inset:0;background-image:linear-gradient(rgba(59,130,246,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.05) 1px,transparent 1px);background-size:60px 60px}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none}
+.orb1{width:500px;height:500px;background:radial-gradient(circle,rgba(16,185,129,.14),transparent 70%);top:-100px;right:-150px;animation:ofloat 8s ease-in-out infinite}
+.orb2{width:400px;height:400px;background:radial-gradient(circle,rgba(37,99,235,.16),transparent 70%);bottom:-80px;left:-100px;animation:ofloat 10s ease-in-out infinite reverse}
+@keyframes ofloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-28px)}}
+
+/* ── AUTH CONTAINER ── */
+.auth-wrap{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem 1rem;gap:1.75rem}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-icon{width:42px;height:42px;background:linear-gradient(135deg,var(--b500),var(--e500));border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.3rem}
+.brand-name{font-size:1.5rem;font-weight:800;letter-spacing:-.03em;background:linear-gradient(90deg,#fff,var(--e400));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.brand.sm .brand-icon{width:34px;height:34px;border-radius:9px;font-size:1rem}
+.brand.sm .brand-name{font-size:1.15rem}
+.auth-card{width:100%;max-width:420px;background:var(--card);border:1px solid var(--cborder);backdrop-filter:blur(20px);border-radius:16px;padding:2rem;box-shadow:0 24px 60px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.05)}
+.tabs{display:flex;gap:4px;background:rgba(255,255,255,.05);border-radius:10px;padding:4px;margin-bottom:1.75rem}
+.tab{flex:1;padding:.5rem;font-size:.875rem;font-weight:600;border:none;background:transparent;color:var(--s400);border-radius:7px;cursor:pointer;transition:all .2s}
+.tab.active{background:var(--n700);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.aform{display:none;flex-direction:column;gap:1rem}
+.aform.active{display:flex}
+.fg{display:flex;flex-direction:column;gap:6px}
+.fg label{font-size:.75rem;font-weight:600;color:var(--s400);text-transform:uppercase;letter-spacing:.06em}
+.fg input{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:.7rem 1rem;color:#fff;font-size:.95rem;outline:none;transition:border-color .2s,box-shadow .2s;width:100%}
+.fg input::placeholder{color:var(--s600)}
+.fg input:focus{border-color:var(--b400);box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+.ferr{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#fca5a5;font-size:.83rem;padding:.55rem .9rem;border-radius:8px}
+.hint{font-size:.8rem;color:var(--s500);text-align:center}
+.hint a{color:var(--e400);text-decoration:none}
+.foot{font-size:.73rem;color:var(--s600);text-align:center}
+
+/* ── BUTTONS ── */
+.btn{width:100%;padding:.82rem 1.5rem;background:linear-gradient(135deg,var(--b500),#1d4ed8);border:none;border-radius:8px;color:#fff;font-size:.95rem;font-weight:700;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 18px rgba(37,99,235,.4);display:flex;align-items:center;justify-content:center;gap:8px}
+.btn:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(37,99,235,.55)}
+.btn:active{transform:translateY(0)}
+.btn.lg{padding:1rem 2rem;font-size:1rem;border-radius:12px}
+.btn-ghost{padding:.42rem .95rem;background:transparent;border:1px solid rgba(255,255,255,.14);color:var(--s300);font-size:.83rem;border-radius:8px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn-ghost:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.22)}
+
+/* ── NAV ── */
+.nav{display:flex;align-items:center;justify-content:space-between;padding:.9rem 2rem;background:rgba(6,13,26,.88);border-bottom:1px solid rgba(255,255,255,.07);backdrop-filter:blur(10px);position:sticky;top:0;z-index:50}
+.nav-r{display:flex;align-items:center;gap:10px}
+.nav-user{font-size:.8rem;color:var(--s400);padding:.32rem .7rem;background:rgba(255,255,255,.05);border-radius:20px}
+
+/* ── INVEST SCREEN ── */
+.inv-wrap{max-width:660px;margin:0 auto;padding:3.5rem 1.5rem 2rem;display:flex;flex-direction:column;align-items:center;gap:2.25rem}
+.hero{text-align:center}
+.hero-badge{display:inline-block;background:linear-gradient(90deg,rgba(16,185,129,.15),rgba(37,99,235,.15));border:1px solid rgba(16,185,129,.3);color:var(--e400);font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.32rem .9rem;border-radius:20px;margin-bottom:1.1rem}
+.hero-title{font-size:clamp(2rem,5vw,3.2rem);font-weight:800;line-height:1.1;letter-spacing:-.03em}
+.hero-title em{font-style:normal;background:linear-gradient(90deg,var(--b400),var(--e400));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-sub{margin-top:.9rem;color:var(--s400);font-size:.95rem;line-height:1.65;max-width:480px}
+.inv-card{width:100%;background:var(--card);border:1px solid var(--cborder);backdrop-filter:blur(20px);border-radius:20px;padding:1.75rem;box-shadow:0 28px 56px rgba(0,0,0,.35)}
+.prof-prev{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:.7rem 1rem;margin-bottom:1.2rem}
+.prof-icon{font-size:1.4rem}
+.prof-name{font-size:.88rem;font-weight:700}
+.prof-desc{font-size:.75rem;color:var(--s400);margin-top:2px}
+.amt-wrap{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.04);border:2px solid rgba(59,130,246,.22);border-radius:14px;padding:.7rem 1.2rem;margin-bottom:1.2rem;transition:border-color .2s}
+.amt-wrap:focus-within{border-color:var(--b400)}
+.cur-sym{font-size:1.6rem;color:var(--s400);flex-shrink:0}
+.amt-wrap input{flex:1;background:transparent;border:none;outline:none;color:#fff;font-size:1.8rem;font-weight:800;letter-spacing:-.02em;min-width:0;width:100%}
+.amt-wrap input::placeholder{color:rgba(255,255,255,.2)}
+.cur-lbl{font-size:.75rem;font-weight:700;color:var(--s500);letter-spacing:.1em;flex-shrink:0}
+.quick{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:1.4rem}
+.qbtn{padding:.38rem .85rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--s300);font-size:.82rem;border-radius:7px;cursor:pointer;transition:all .2s}
+.qbtn:hover,.qbtn.on{background:rgba(37,99,235,.2);border-color:var(--b400);color:#fff}
+
+/* ── TICKER ── */
+.ticker-wrap{width:100%;overflow:hidden;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:.55rem 0}
+.ticker-track{display:flex;animation:tscroll 32s linear infinite;white-space:nowrap}
+.titem{display:inline-flex;align-items:center;gap:7px;padding:0 1.4rem;font-size:.8rem}
+.tsym{font-weight:700;color:#fff}
+.tprice{color:var(--s400)}
+.tup{color:var(--e400)}
+.tdown{color:var(--r400)}
+.tsep{color:var(--s600)}
+@keyframes tscroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ── DASHBOARD ── */
+.dash-wrap{max-width:1200px;margin:0 auto;padding:1.75rem 1.5rem 4rem}
+
+/* Advisor */
+.advisor{background:linear-gradient(135deg,rgba(15,32,64,.95),rgba(22,45,87,.7));border:1px solid rgba(59,130,246,.28);border-radius:16px;padding:1.5rem;margin-bottom:1.6rem;position:relative;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.25)}
+.advisor::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--b500),var(--e500),var(--b400))}
+.adv-head{display:flex;align-items:flex-start;gap:13px;margin-bottom:.9rem}
+.adv-avatar{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--b500),#059669);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+.adv-lbl{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--s500);margin-bottom:3px}
+.adv-title{font-size:1.05rem;font-weight:700}
+.adv-body{font-size:.9rem;line-height:1.75;color:var(--s300);margin-bottom:.9rem}
+.adv-tags{display:flex;flex-wrap:wrap;gap:7px}
+.atag{padding:.28rem .8rem;border-radius:20px;font-size:.72rem;font-weight:600;letter-spacing:.03em}
+.tag-b{background:rgba(37,99,235,.2);border:1px solid rgba(59,130,246,.35);color:var(--b300)}
+.tag-g{background:rgba(16,185,129,.2);border:1px solid rgba(52,211,153,.35);color:var(--e400)}
+.tag-a{background:rgba(251,191,36,.14);border:1px solid rgba(251,191,36,.3);color:var(--a300)}
+
+/* Dash header */
+.dash-head{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1.2rem;margin-bottom:1.6rem;padding-bottom:1.4rem;border-bottom:1px solid rgba(255,255,255,.07)}
+.dlbl{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--s500);margin-bottom:3px}
+.dtotal{font-size:2.3rem;font-weight:800;letter-spacing:-.03em;background:linear-gradient(90deg,#fff,var(--e400));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.split-row{display:flex;gap:9px}
+.split{display:flex;flex-direction:column;align-items:center;padding:.6rem 1.1rem;border-radius:11px;border:1px solid}
+.split.eq{background:rgba(37,99,235,.12);border-color:rgba(59,130,246,.3)}
+.split.sv{background:rgba(16,185,129,.12);border-color:rgba(52,211,153,.3)}
+.split-pct{font-size:1.3rem;font-weight:800}
+.split.eq .split-pct{color:var(--b400)}
+.split.sv .split-pct{color:var(--e400)}
+.split-lbl{font-size:.68rem;color:var(--s400);letter-spacing:.04em;text-align:center}
+
+/* Grid */
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+@media(max-width:860px){.dgrid{grid-template-columns:1fr}}
+.dcol{display:flex;flex-direction:column;gap:1.2rem}
+
+/* Card */
+.card{background:var(--card);border:1px solid var(--cborder);backdrop-filter:blur(16px);border-radius:14px;padding:1.4rem;box-shadow:0 6px 24px rgba(0,0,0,.2)}
+.ctitle{font-size:.87rem;font-weight:700;color:var(--s300);margin-bottom:1.1rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.bdyn{background:rgba(37,99,235,.2);border:1px solid rgba(59,130,246,.3);color:var(--b300);font-size:.68rem;font-weight:600;padding:2px 7px;border-radius:20px}
+
+/* Chart */
+.chart-wrap{display:flex;align-items:center;gap:1.3rem;flex-wrap:wrap}
+.chart-wrap canvas{max-width:170px;max-height:170px;flex-shrink:0}
+.cleg{display:flex;flex-direction:column;gap:9px;flex:1}
+.li{display:flex;align-items:center;gap:9px}
+.ldot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.lsym{font-size:.83rem;font-weight:700;flex:1}
+.lpct{font-size:.8rem;color:var(--s400)}
+
+/* Stocks */
+.slist{display:flex;flex-direction:column;gap:9px}
+.sitem{display:flex;align-items:flex-start;gap:11px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:.8rem .95rem;transition:border-color .2s}
+.sitem:hover{border-color:rgba(59,130,246,.3)}
+.slogo{width:36px;height:36px;border-radius:8px;flex-shrink:0;background:linear-gradient(135deg,var(--n700),var(--n800));border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:800;color:var(--b300)}
+.sinfo{flex:1;min-width:0}
+.ssym{font-size:.88rem;font-weight:700}
+.sname{font-size:.72rem;color:var(--s500)}
+.srat{font-size:.72rem;color:var(--s400);margin-top:3px;line-height:1.4}
+.sright{text-align:right;flex-shrink:0}
+.salloc{font-size:.9rem;font-weight:700;color:var(--b300)}
+.sprice{font-size:.7rem;color:var(--s500)}
+.sshares{font-size:.68rem;color:var(--e400);margin-top:2px}
+
+/* Trends */
+.tlist{display:flex;flex-direction:column;gap:8px}
+.trow{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.03);border-radius:8px;padding:.55rem .8rem}
+.tsym2{font-size:.8rem;font-weight:700;width:50px;flex-shrink:0}
+.tmons{display:flex;gap:4px;flex:1}
+.tmon{flex:1;height:27px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700}
+.tmon.up{background:rgba(16,185,129,.2);color:var(--e400)}
+.tmon.dn{background:rgba(251,113,133,.15);color:var(--r400)}
+.tmon.fl{background:rgba(100,116,139,.15);color:var(--s400)}
+.tsum{font-size:.73rem;width:55px;text-align:right;flex-shrink:0}
+
+/* Savings */
+.sv-card{text-align:center}
+.sv-icon{width:46px;height:46px;background:rgba(16,185,129,.15);border:1px solid rgba(52,211,153,.3);border-radius:13px;display:flex;align-items:center;justify-content:center;margin:0 auto .9rem;color:var(--e400)}
+.sv-amt{font-size:2rem;font-weight:800;color:var(--e400);margin-bottom:.35rem;letter-spacing:-.02em}
+.sv-sub{font-size:.79rem;color:var(--s500);margin-bottom:.9rem}
+.sv-projs{display:flex;gap:7px;justify-content:center;flex-wrap:wrap}
+.pj{background:rgba(16,185,129,.1);border:1px solid rgba(52,211,153,.2);border-radius:8px;padding:.45rem .7rem;text-align:center}
+.pjl{font-size:.65rem;color:var(--s500);text-transform:uppercase;letter-spacing:.05em}
+.pjv{font-size:.9rem;font-weight:700;color:var(--e400)}
+
+/* Banks */
+.bctx{font-size:.8rem;color:var(--s400);margin-bottom:.9rem;line-height:1.55}
+.btbl{width:100%;border-collapse:collapse;font-size:.82rem}
+.btbl th{color:var(--s500);font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:0 .7rem .7rem;text-align:left;white-space:nowrap}
+.btbl td{padding:.6rem .7rem;border-top:1px solid rgba(255,255,255,.05)}
+.btbl tr.best td{background:rgba(16,185,129,.07)}
+.bname{font-weight:600;color:#fff}
+.bnota{font-size:.68rem;color:var(--s500)}
+.brate{font-weight:700;color:var(--e400)}
+.bgain{color:var(--s300)}
+.best-tag{background:rgba(16,185,129,.2);border:1px solid rgba(52,211,153,.4);color:var(--e400);font-size:.65rem;font-weight:700;padding:2px 6px;border-radius:20px;white-space:nowrap}
+.brec{margin-top:.9rem;padding:.7rem .9rem;background:rgba(16,185,129,.08);border:1px solid rgba(52,211,153,.2);border-radius:10px;font-size:.8rem;color:var(--s300);line-height:1.55}
+.brec strong{color:var(--e400)}
+
+@keyframes fadeup{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.card,.advisor{animation:fadeup .45s ease both}
+
+@media(max-width:600px){
+  .nav{padding:.7rem 1rem}
+  .inv-wrap{padding:2.5rem 1rem}
+  .dash-wrap{padding:1.2rem 1rem 3rem}
+  .auth-card{padding:1.5rem}
+  .dtotal{font-size:1.75rem}
+  .chart-wrap canvas{max-width:140px;max-height:140px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ PANTALLA 1: AUTH ═══════════ -->
+<div id="s-auth" class="screen active">
+  <div class="auth-bg">
+    <div class="grid-ov"></div>
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+  </div>
+  <div class="auth-wrap">
+    <div class="brand">
+      <div class="brand-icon">💎</div>
+      <span class="brand-name">NexWealth</span>
+    </div>
+    <div class="auth-card">
+      <div class="tabs">
+        <button class="tab active" id="tab-login">Iniciar sesión</button>
+        <button class="tab" id="tab-reg">Registro</button>
+      </div>
+      <!-- Login -->
+      <div class="aform active" id="f-login">
+        <div class="fg"><label>Correo</label><input type="email" id="l-email" placeholder="tu@email.com"/></div>
+        <div class="fg"><label>Contraseña</label><input type="password" id="l-pass" placeholder="••••••••"/></div>
+        <div class="ferr hidden" id="l-err"></div>
+        <button class="btn" id="btn-login">Entrar a mi cuenta</button>
+        <p class="hint">¿Sin cuenta? <a href="#" id="go-reg">Regístrate gratis</a></p>
+      </div>
+      <!-- Registro -->
+      <div class="aform" id="f-reg">
+        <div class="fg"><label>Nombre</label><input type="text" id="r-name" placeholder="Tu nombre"/></div>
+        <div class="fg"><label>Correo</label><input type="email" id="r-email" placeholder="tu@email.com"/></div>
+        <div class="fg"><label>Contraseña</label><input type="password" id="r-pass" placeholder="Mín. 6 caracteres"/></div>
+        <div class="ferr hidden" id="r-err"></div>
+        <button class="btn" id="btn-reg">Crear cuenta</button>
+        <p class="hint">¿Ya tienes cuenta? <a href="#" id="go-login">Inicia sesión</a></p>
+      </div>
+    </div>
+    <p class="foot">Simulación educativa · No constituye asesoría financiera real</p>
+  </div>
+</div>
+
+<!-- ═══════════ PANTALLA 2: INVERSIÓN ═══════════ -->
+<div id="s-invest" class="screen">
+  <nav class="nav">
+    <div class="brand sm"><div class="brand-icon">💎</div><span class="brand-name">NexWealth</span></div>
+    <div class="nav-r">
+      <span class="nav-user" id="nav-u1"></span>
+      <button class="btn-ghost" id="btn-out1">Salir</button>
+    </div>
+  </nav>
+  <div class="inv-wrap">
+    <div class="hero">
+      <div class="hero-badge">Asesor financiero inteligente</div>
+      <h1 class="hero-title">¿Cuánto deseas<br/><em>invertir hoy?</em></h1>
+      <p class="hero-sub">Ingresa tu capital en pesos chilenos y nuestro asesor construirá un plan completamente personalizado para tu perfil de riesgo.</p>
+    </div>
+    <div class="inv-card">
+      <div class="prof-prev hidden" id="prof-prev">
+        <span class="prof-icon" id="prof-icon"></span>
+        <div><div class="prof-name" id="prof-name"></div><div class="prof-desc" id="prof-desc"></div></div>
+      </div>
+      <div class="amt-wrap">
+        <span class="cur-sym">$</span>
+        <input type="number" id="amt" placeholder="0" min="1000" step="1000"/>
+        <span class="cur-lbl">CLP</span>
+      </div>
+      <div class="quick" id="quick-btns">
+        <button class="qbtn" data-v="50000">$50.000</button>
+        <button class="qbtn" data-v="200000">$200.000</button>
+        <button class="qbtn" data-v="500000">$500.000</button>
+        <button class="qbtn" data-v="1000000">$1.000.000</button>
+        <button class="qbtn" data-v="5000000">$5.000.000</button>
+      </div>
+      <div class="ferr hidden" id="amt-err"></div>
+      <button class="btn lg" id="btn-calc">
+        <span>Analizar mi portafolio</span>
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+    <div class="ticker-wrap"><div class="ticker-track" id="ticker"></div></div>
+  </div>
+</div>
+
+<!-- ═══════════ PANTALLA 3: DASHBOARD ═══════════ -->
+<div id="s-dash" class="screen">
+  <nav class="nav">
+    <div class="brand sm"><div class="brand-icon">💎</div><span class="brand-name">NexWealth</span></div>
+    <div class="nav-r">
+      <span class="nav-user" id="nav-u2"></span>
+      <button class="btn-ghost" id="btn-back">← Recalcular</button>
+      <button class="btn-ghost" id="btn-out2">Salir</button>
+    </div>
+  </nav>
+  <div class="dash-wrap">
+    <!-- Análisis del asesor -->
+    <div class="advisor" id="advisor">
+      <div class="adv-head">
+        <div class="adv-avatar" id="adv-av"></div>
+        <div><div class="adv-lbl">Análisis del Asesor · NexWealth AI</div><div class="adv-title" id="adv-title"></div></div>
+      </div>
+      <p class="adv-body" id="adv-body"></p>
+      <div class="adv-tags" id="adv-tags"></div>
+    </div>
+    <!-- Resumen -->
+    <div class="dash-head">
+      <div><p class="dlbl">Capital analizado</p><h2 class="dtotal" id="d-total"></h2></div>
+      <div class="split-row">
+        <div class="split eq"><span class="split-pct" id="eq-pct">—</span><span class="split-lbl" id="eq-lbl">Renta Variable</span></div>
+        <div class="split sv"><span class="split-pct" id="sv-pct">—</span><span class="split-lbl">Ahorro</span></div>
+      </div>
+    </div>
+    <!-- Grid -->
+    <div class="dgrid">
+      <div class="dcol">
+        <div class="card"><h3 class="ctitle">Distribución del portafolio</h3><div class="chart-wrap"><canvas id="donut"></canvas><div class="cleg" id="cleg"></div></div></div>
+        <div class="card"><h3 class="ctitle" id="inst-title">Instrumentos recomendados <span class="bdyn" id="eq-badge"></span></h3><div class="slist" id="slist"></div></div>
+        <div class="card"><h3 class="ctitle">Tendencias · últimos 5 meses</h3><div class="tlist" id="tlist"></div></div>
+      </div>
+      <div class="dcol">
+        <div class="card sv-card">
+          <div class="sv-icon"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+          <h3 class="ctitle" id="sv-title" style="justify-content:center">Instrumento de Ahorro</h3>
+          <div class="sv-amt" id="sv-amt"></div>
+          <p class="sv-sub" id="sv-sub"></p>
+          <div class="sv-projs" id="sv-projs"></div>
+        </div>
+        <div class="card">
+          <h3 class="ctitle">Comparativa de instituciones</h3>
+          <p class="bctx" id="bctx"></p>
+          <div style="overflow-x:auto">
+            <table class="btbl"><thead><tr><th>Institución</th><th>Tasa</th><th>Ganancia/año</th><th></th></tr></thead><tbody id="btbody"></tbody></table>
+          </div>
+          <div class="brec" id="brec"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   NEXWEALTH — JavaScript completo
+═══════════════════════════════════════════════ */
+
+/* ── DATOS ── */
+const USD_CLP = 940;
+const UMBRALES = { MICRO:200000, BAJO:500000, MEDIO:1000000, ALTO:5000000 };
+
+const ACCIONES = [
+  { sym:'MSFT', name:'Microsoft Corporation',  usd:390, sector:'Tecnología',     rat:'Liderazgo en nube (Azure) e IA. Flujo de caja estable y dividendo creciente.' },
+  { sym:'JPM',  name:'JPMorgan Chase & Co.',   usd:240, sector:'Financiero',     rat:'Banco más rentable de EE.UU. Se beneficia directamente de tasas de interés altas.' },
+  { sym:'NVDA', name:'NVIDIA Corporation',     usd:118, sector:'Semiconductores',rat:'Infraestructura esencial de la revolución IA. Márgenes operativos superiores al 55%.' },
+  { sym:'AAPL', name:'Apple Inc.',             usd:211, sector:'Tecnología',     rat:'Ecosistema de 2.000M de usuarios. Programa masivo de recompra de acciones.' },
+  { sym:'TSLA', name:'Tesla Inc.',             usd:275, sector:'Automotriz',     rat:'Líder en vehículos eléctricos. Alto potencial y alta volatilidad.' },
+  { sym:'KO',   name:'Coca-Cola Company',      usd:63,  sector:'Consumo',        rat:'Dividendo ininterrumpido por +60 años. Refugio clásico ante ciclos recesivos.' },
+  { sym:'F',    name:'Ford Motor Company',     usd:10,  sector:'Automotriz',     rat:'Acceso al mercado EV a precio accesible. Mayor riesgo, mayor potencial.' },
+  { sym:'T',    name:'AT&T Inc.',              usd:18,  sector:'Telecom',        rat:'Rendimiento por dividendo ~7%. Opción de renta para perfiles conservadores.' },
+];
+
+const ETFS = [
+  { sym:'SCHB', name:'Schwab Total Market ETF',        usd:23,  sector:'ETF EE.UU.',  rat:'ETF de menor precio por acción. Exposición a miles de empresas americanas.' },
+  { sym:'ITOT', name:'iShares Total Market ETF',       usd:105, sector:'ETF EE.UU.',  rat:'Más de 3.000 empresas americanas con comisión de solo 0,03%.' },
+  { sym:'IPSA', name:'ETF IPSA (Mercado Chileno)',     usd:18,  sector:'ETF Chile',   rat:'Replica el índice bursátil chileno. Sin riesgo cambiario USD/CLP.' },
+  { sym:'IEF',  name:'iShares Treasury Bond 7-10yr',  usd:93,  sector:'Renta Fija',  rat:'Bonos del Tesoro americano. Reduce la volatilidad total del portafolio.' },
+  { sym:'VOO',  name:'Vanguard S&P 500 ETF',          usd:512, sector:'ETF S&P 500', rat:'Las 500 empresas más grandes de EE.UU. ~10% de rendimiento histórico anual.' },
+];
+
+const BANCOS_BAJO = [
+  { nom:'Mercado Pago',  tasa:7.5, tipo:'Cuenta remunerada', nota:'Liquidez inmediata · Sin saldo mínimo' },
+  { nom:'MACH (BCI)',    tasa:6.2, tipo:'Cuenta vista',      nota:'Acceso 24/7 · Transferencias gratis' },
+  { nom:'Coopeuch',      tasa:5.8, tipo:'Depósito 30 días',  nota:'Sin costo de mantención' },
+];
+const BANCOS_ALTO = [
+  { nom:'Banco de Chile (DAP)', tasa:5.10, tipo:'Depósito a Plazo', nota:'Tasa fija garantizada · 90–365 días' },
+  { nom:'BancoEstado (DAP)',    tasa:4.90, tipo:'Depósito a Plazo', nota:'Respaldo estatal · Ideal patrimonios' },
+  { nom:'Santander Chile',      tasa:4.70, tipo:'Depósito a Plazo', nota:'Renovación automática disponible' },
+];
+
+const TENDS = {
+  MSFT:[2.1,3.4,-1.2,4.0,1.8], JPM:[1.5,-0.8,2.3,3.1,2.6],
+  NVDA:[8.2,-4.1,11.3,-2.0,6.7], AAPL:[1.2,2.8,-0.5,1.9,3.0],
+  TSLA:[-5.3,9.1,-3.8,7.2,-2.1], KO:[0.4,0.6,0.2,0.8,0.3],
+  F:[-2.1,1.2,3.4,-1.8,2.0], T:[0.3,-0.2,0.5,0.4,0.1],
+  SCHB:[1.2,1.7,-0.5,2.2,1.4], ITOT:[1.3,1.8,-0.4,2.1,1.5],
+  IPSA:[0.8,-1.2,2.5,1.0,1.8], IEF:[0.2,0.5,0.1,-0.1,0.4],
+  VOO:[1.5,2.0,-0.3,2.4,1.7],
+};
+const MESES = ['Nov','Dic','Ene','Feb','Mar'];
+const COLORES = ['#3b82f6','#10b981','#f59e0b','#8b5cf6','#f43f5e'];
+
+/* ── HELPERS ── */
+const G = id => document.getElementById(id);
+const fmtCLP = n => '$\u00A0' + Math.round(n).toLocaleString('es-CL');
+const clpOf  = i => i.usd * USD_CLP;
+
+function goScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  G(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function showErr(id, msg){ const e=G(id); e.textContent=msg; e.classList.remove('hidden'); }
+function hideErr(id){ G(id).classList.add('hidden'); }
+
+/* ── AUTH ── */
+let USER = null;
+const getUsers = ()  => JSON.parse(localStorage.getItem('nw2_u')||'{}');
+const saveUsers = u  => localStorage.setItem('nw2_u', JSON.stringify(u));
+const getSess   = () => localStorage.getItem('nw2_s');
+const setSess   = e  => localStorage.setItem('nw2_s', e);
+const delSess   = () => localStorage.removeItem('nw2_s');
+
+function doLogin() {
+  hideErr('l-err');
+  const em = G('l-email').value.trim().toLowerCase();
+  const pw = G('l-pass').value;
+  if (!em||!pw){ showErr('l-err','Completa todos los campos.'); return; }
+  const u = getUsers()[em];
+  if (!u || u.pw !== btoa(pw)){ showErr('l-err','Correo o contraseña incorrectos.'); return; }
+  setSess(em); loginOk(u);
+}
+function doReg() {
+  hideErr('r-err');
+  const nm = G('r-name').value.trim();
+  const em = G('r-email').value.trim().toLowerCase();
+  const pw = G('r-pass').value;
+  if (!nm||!em||!pw){ showErr('r-err','Completa todos los campos.'); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ showErr('r-err','Correo inválido.'); return; }
+  if (pw.length<6){ showErr('r-err','Mínimo 6 caracteres.'); return; }
+  const us = getUsers();
+  if (us[em]){ showErr('r-err','Correo ya registrado.'); return; }
+  us[em] = { nm, em, pw: btoa(pw) };
+  saveUsers(us); setSess(em); loginOk(us[em]);
+}
+function loginOk(u) {
+  USER = u;
+  const nombre = (u.nm || u.name || 'Usuario').split(' ')[0];
+  G('nav-u1').textContent = '👤 ' + nombre;
+  G('nav-u2').textContent = '👤 ' + nombre;
+  G('prof-prev').classList.add('hidden');
+  G('amt').value = '';
+  document.querySelectorAll('.qbtn').forEach(b => b.classList.remove('on'));
+  goScreen('s-invest');
+}
+function doLogout() {
+  delSess(); USER = null; goScreen('s-auth');
+}
+
+function switchTab(to) {
+  G('tab-login').classList.toggle('active', to==='login');
+  G('tab-reg').classList.toggle('active', to==='reg');
+  G('f-login').classList.toggle('active', to==='login');
+  G('f-reg').classList.toggle('active', to==='reg');
+}
+
+/* ── PERFIL ── */
+function getPerfil(clp) {
+  if (clp < UMBRALES.MICRO) return { icon:'🏦', nom:'Perfil Ahorro Total',   desc:'Capital inicial · Prioridad: ahorro seguro',          eq:10, sv:90 };
+  if (clp < UMBRALES.BAJO)  return { icon:'🌱', nom:'Perfil Conservador',    desc:'Capital bajo · ETFs de bajo costo + ahorro',          eq:30, sv:70 };
+  if (clp < UMBRALES.MEDIO) return { icon:'📈', nom:'Perfil Moderado',       desc:'Capital medio · Mix ETF + acciones asequibles',       eq:50, sv:50 };
+  if (clp < UMBRALES.ALTO)  return { icon:'💼', nom:'Perfil Crecimiento',    desc:'Buen capital · Acciones líderes + diversificación',   eq:60, sv:40 };
+  return                           { icon:'🏛️', nom:'Perfil Patrimonial',   desc:'Capital significativo · Gestión institucional',       eq:65, sv:35 };
+}
+
+/* ── MOTOR DE CÁLCULO ── */
+function calcular(totalCLP) {
+  const p = getPerfil(totalCLP);
+  const eqBudget = totalCLP * p.eq / 100;
+  const svBudget = totalCLP * p.sv / 100;
+
+  let picks = [], esETF = false;
+
+  if (totalCLP >= UMBRALES.ALTO) {
+    picks = ACCIONES.filter(a => clpOf(a) <= totalCLP).sort((a,b)=>b.usd-a.usd).slice(0,3);
+  } else if (totalCLP >= UMBRALES.MEDIO) {
+    picks = ACCIONES.filter(a => clpOf(a) <= eqBudget*0.5).sort((a,b)=>b.usd-a.usd).slice(0,3);
+    if (picks.length < 2) { esETF=true; picks=[]; }
+  } else if (totalCLP >= UMBRALES.BAJO) {
+    esETF = true;
+    picks = ETFS.filter(e => clpOf(e) <= eqBudget).sort((a,b)=>a.usd-b.usd).slice(0,3);
+  } else if (totalCLP >= UMBRALES.MICRO) {
+    esETF = true;
+    picks = ETFS.filter(e => clpOf(e) <= eqBudget).sort((a,b)=>a.usd-b.usd).slice(0,2);
+  }
+
+  const W = [0.50,0.30,0.20];
+  const alloc = picks.map((s,i) => {
+    const w = picks.length===1 ? 1 : (W[i]||0.20);
+    const a = eqBudget * w;
+    return { ...s, aloc:a, shares:Math.floor(a/clpOf(s)), pclp:clpOf(s) };
+  });
+
+  const bancos = totalCLP < UMBRALES.MEDIO ? BANCOS_BAJO : BANCOS_ALTO;
+  const bestB  = [...bancos].sort((a,b)=>b.tasa-a.tasa)[0];
+  const projs  = [1,3,5].map(y => ({ y, v: svBudget * Math.pow(1+bestB.tasa/100, y) }));
+
+  return { totalCLP, p, eqBudget, svBudget, alloc, esETF, bancos, bestB, projs };
+}
+
+/* ── TEXTO DINÁMICO DEL ASESOR ── */
+function getAnalisis(data) {
+  const { totalCLP, p, alloc, esETF, bestB, svBudget } = data;
+  const m = fmtCLP(totalCLP);
+  const nom = (USER.nm||USER.name||'').split(' ')[0];
+
+  if (totalCLP < UMBRALES.MICRO) return {
+    title:`${nom}, consolidemos tu base antes de invertir en bolsa`,
+    body:`Basado en tu inversión de ${m} CLP, mi recomendación es destinar el 90% a una cuenta de ahorro de alto rendimiento. Con este nivel de capital, los costos de transacción y la volatilidad del mercado pueden erosionar el patrimonio rápidamente. Mercado Pago ofrece tasas superiores al 7% anual con liquidez inmediata. El objetivo es alcanzar $500.000 CLP para comenzar a diversificar hacia ETFs.`,
+    tags:[{t:'Riesgo Bajo',c:'tag-g'},{t:'Liquidez Inmediata',c:'tag-b'},{t:'Horizonte: 0–6 meses',c:'tag-a'}],
+  };
+  if (totalCLP < UMBRALES.BAJO) return {
+    title:`${nom}, ETFs de bajo costo: tu mejor puerta de entrada`,
+    body:`Basado en tu inversión de ${m} CLP, mi recomendación es comenzar con ETFs diversificados en lugar de acciones individuales. Comprar una sola acción de Microsoft (~$366.600 CLP) representaría más del 70% de tu portafolio, una concentración muy alta. SCHB o IPSA te dan exposición a cientos de empresas desde $23.000 CLP, reduciendo el riesgo. El 70% restante en ahorro actúa como reserva de liquidez.`,
+    tags:[{t:'Diversificación ETF',c:'tag-g'},{t:'Riesgo Controlado',c:'tag-b'},{t:'Horizonte: 6–18 meses',c:'tag-a'}],
+  };
+  if (totalCLP < UMBRALES.MEDIO) {
+    const inst = alloc[0]?.sym || 'ETF diversificado';
+    return {
+      title:`${nom}, balance estratégico entre crecimiento y protección`,
+      body:`Basado en tu inversión de ${m} CLP, mi recomendación es una estrategia 50/50 que combina renta variable con ahorro estructurado. ${inst} lidera tu portafolio de inversión. El mercado chileno (IPSA) muestra un ciclo de recuperación con tendencia positiva en minería y retail. Mantén el 50% en ahorro hasta consolidar un fondo de emergencia equivalente a 3 meses de gastos.`,
+      tags:[{t:'Portafolio Mixto',c:'tag-b'},{t:'Mercado Chileno ↑',c:'tag-g'},{t:'Horizonte: 1–2 años',c:'tag-a'}],
+    };
+  }
+  if (totalCLP < UMBRALES.ALTO) {
+    const syms = alloc.map(e=>e.sym).join(', ') || 'acciones líderes';
+    return {
+      title:`${nom}, diversificación con acciones líderes globales`,
+      body:`Basado en tu inversión de ${m} CLP, mi recomendación es construir un portafolio de acciones de alta calidad: ${syms}. La clave es la diversificación sectorial, evitando más del 35% en tecnología. MSFT aporta estabilidad, JPM da exposición financiera en tasas altas, y TSLA añade potencial de crecimiento con mayor volatilidad. El 40% en DAP en Banco de Chile garantiza tasa fija que protege el patrimonio.`,
+      tags:[{t:'Acciones Líderes',c:'tag-b'},{t:'Diversificación Sectorial',c:'tag-g'},{t:'Horizonte: 2–5 años',c:'tag-a'}],
+    };
+  }
+  const syms = alloc.map(e=>e.sym).join(', ') || 'acciones de primer nivel';
+  return {
+    title:`${nom}, gestión patrimonial con visión institucional`,
+    body:`Basado en tu inversión de ${m} CLP, mi recomendación es un portafolio institucional con posiciones en ${syms}. A este nivel patrimonial considera además bonos del Tesoro (IEF) para reducir correlación con renta variable. El DAP en Banco de Chile o BancoEstado ofrece tasas competitivas con respaldo de primera línea. Rebalanceo trimestral recomendado.`,
+    tags:[{t:'Portafolio Institucional',c:'tag-b'},{t:'Gestión Activa',c:'tag-g'},{t:'Horizonte: 5+ años',c:'tag-a'}],
+  };
+}
+
+/* ── RENDER DASHBOARD ── */
+let chart = null;
+
+function renderDash(data) {
+  const { totalCLP, p, eqBudget, svBudget, alloc, esETF, bancos, bestB, projs } = data;
+
+  // Asesor
+  const an = getAnalisis(data);
+  G('adv-av').textContent    = p.icon;
+  G('adv-title').textContent = an.title;
+  G('adv-body').textContent  = an.body;
+  G('adv-tags').innerHTML    = an.tags.map(t=>`<span class="atag ${t.c}">${t.t}</span>`).join('');
+
+  // Header
+  G('d-total').textContent = fmtCLP(totalCLP);
+  G('eq-pct').textContent  = p.eq + '%';
+  G('sv-pct').textContent  = p.sv + '%';
+  G('eq-lbl').textContent  = esETF ? 'ETFs' : 'Acciones';
+
+  // Instrumentos
+  G('inst-title').innerHTML = `${esETF?'ETFs recomendados':'Acciones recomendadas'} <span class="bdyn">${p.eq}% — ${fmtCLP(eqBudget)}</span>`;
+  if (alloc.length === 0) {
+    G('slist').innerHTML = `<div class="sitem"><div class="slogo">🏦</div><div class="sinfo"><div class="ssym">100% Ahorro</div><div class="srat">Con tu capital actual la estrategia óptima es concentrar el 100% en ahorro de alto rendimiento. Cuando alcances $200.000 CLP podrás diversificar hacia ETFs.</div></div></div>`;
+  } else {
+    G('slist').innerHTML = alloc.map(s=>`
+      <div class="sitem">
+        <div class="slogo">${s.sym.slice(0,4)}</div>
+        <div class="sinfo">
+          <div class="ssym">${s.sym}</div>
+          <div class="sname">${s.name} · ${s.sector}</div>
+          <div class="srat">${s.rat}</div>
+        </div>
+        <div class="sright">
+          <div class="salloc">${fmtCLP(s.aloc)}</div>
+          <div class="sprice">${fmtCLP(s.pclp)}/u.</div>
+          <div class="sshares">${s.shares>0?'≈ '+s.shares+' u.':'Fracción'}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  // Tendencias
+  const tlEl = G('tlist');
+  if (alloc.length===0) {
+    tlEl.innerHTML = `<div class="trow"><span style="font-size:.8rem;color:var(--s500)">Sin instrumentos de renta variable en este perfil.</span></div>`;
+  } else {
+    tlEl.innerHTML = alloc.slice(0,3).map(s => {
+      const d = TENDS[s.sym]||[0,0,0,0,0];
+      const tot = d.reduce((a,b)=>a+b,0);
+      const tcls = tot>=0 ? 'color:var(--e400)' : 'color:var(--r400)';
+      const mons = d.map((v,i)=>{
+        const c = v>0.2?'up':v<-0.2?'dn':'fl';
+        const ar = v>0.2?'↑':v<-0.2?'↓':'→';
+        return `<div class="tmon ${c}" title="${MESES[i]}: ${v>0?'+':''}${v}%">${ar}</div>`;
+      }).join('');
+      return `<div class="trow"><span class="tsym2">${s.sym}</span><div class="tmons">${mons}</div><span class="tsum" style="${tcls}">${tot>=0?'+':''}${tot.toFixed(1)}%</span></div>`;
+    }).join('') +
+    `<div class="trow" style="padding-top:0"><span class="tsym2" style="visibility:hidden">x</span><div class="tmons">${MESES.map(m=>`<div class="tmon fl" style="background:transparent;color:var(--s600);font-size:.6rem">${m}</div>`).join('')}</div><span class="tsum"></span></div>`;
+  }
+
+  // Ahorro
+  G('sv-title').textContent = totalCLP < UMBRALES.MEDIO ? 'Cuenta de Ahorro Remunerada' : 'Depósito a Plazo (DAP)';
+  G('sv-amt').textContent   = fmtCLP(svBudget);
+  G('sv-sub').textContent   = `${p.sv}% de tu capital · Tasa referencial ${bestB.tasa}% anual`;
+  G('sv-projs').innerHTML   = projs.map(pr=>`<div class="pj"><div class="pjl">${pr.y} año${pr.y>1?'s':''}</div><div class="pjv">${fmtCLP(pr.v)}</div></div>`).join('');
+
+  // Bancos
+  G('bctx').textContent = totalCLP < UMBRALES.MEDIO
+    ? 'Para capitales bajos priorizamos liquidez inmediata. Puedes retirar en cualquier momento sin penalización.'
+    : 'Para capitales significativos el DAP garantiza tasa fija durante el plazo pactado, protegiéndote de variaciones del BCCh.';
+
+  const maxT = Math.max(...bancos.map(b=>b.tasa));
+  G('btbody').innerHTML = bancos.map(b=>{
+    const g = svBudget*(b.tasa/100);
+    const best = b.tasa===maxT;
+    return `<tr class="${best?'best':''}">
+      <td><div class="bname">${b.nom}</div><div class="bnota">${b.nota}</div></td>
+      <td><span class="brate">${b.tasa.toFixed(2)}%</span></td>
+      <td><span class="bgain">${fmtCLP(g)}</span></td>
+      <td>${best?'<span class="best-tag">⭐ Mejor</span>':''}</td>
+    </tr>`;
+  }).join('');
+
+  const gain1 = svBudget*(bestB.tasa/100);
+  G('brec').innerHTML = `<strong>${bestB.nom}</strong> es tu mejor opción para el ${p.sv}% de ahorro (${fmtCLP(svBudget)} CLP). Con ${bestB.tasa}% anual en ${bestB.tipo} generarías <strong>${fmtCLP(gain1)} CLP</strong> en el primer año. ${totalCLP<UMBRALES.MEDIO?'La liquidez inmediata es clave en esta etapa.':'La tasa fija te protege de posibles bajas en las tasas de referencia del BCCh.'}`;
+
+  // Donut
+  if (chart) { chart.destroy(); chart = null; }
+  const labels = alloc.length>0 ? [...alloc.map(s=>s.sym),'Ahorro'] : ['Ahorro 100%'];
+  const vals   = alloc.length>0 ? [...alloc.map(s=>s.aloc), svBudget] : [totalCLP];
+  const cols   = alloc.length>0 ? alloc.map((_,i)=>COLORES[i]).concat(COLORES[3]) : [COLORES[1]];
+
+  chart = new Chart(G('donut').getContext('2d'), {
+    type:'doughnut',
+    data:{ labels, datasets:[{ data:vals, backgroundColor:cols.map(c=>c+'cc'), borderColor:cols, borderWidth:2, hoverOffset:7 }] },
+    options:{
+      cutout:'68%',
+      plugins:{
+        legend:{display:false},
+        tooltip:{ callbacks:{ label: ctx=>' '+fmtCLP(ctx.raw)+' ('+((ctx.raw/totalCLP)*100).toFixed(1)+'%)' },
+          backgroundColor:'#0f2040',borderColor:'rgba(59,130,246,.3)',borderWidth:1,titleColor:'#fff',bodyColor:'#94a3b8' }
+      },
+      animation:{animateRotate:true,duration:850}
+    }
+  });
+  G('cleg').innerHTML = labels.map((l,i)=>`<div class="li"><div class="ldot" style="background:${cols[i]}"></div><span class="lsym">${l}</span><span class="lpct">${((vals[i]/totalCLP)*100).toFixed(0)}%</span></div>`).join('');
+}
+
+/* ── TICKER ── */
+function buildTicker() {
+  const all = [...ACCIONES,...ETFS];
+  const html = all.map(s=>{
+    const t = TENDS[s.sym]||[0,0,0,0,0];
+    const chg = t[t.length-1].toFixed(1);
+    const up  = parseFloat(chg)>=0;
+    return `<span class="titem"><span class="tsym">${s.sym}</span><span class="tprice">${fmtCLP(clpOf(s))}</span><span class="${up?'tup':'tdown'}">${up?'▲':'▼'} ${Math.abs(chg)}%</span><span class="tsep">·</span></span>`;
+  }).join('');
+  G('ticker').innerHTML = html + html;
+}
+
+/* ── PREVIEW PERFIL ── */
+function updatePreview(clp) {
+  if (!clp||clp<=0) { G('prof-prev').classList.add('hidden'); return; }
+  const p = getPerfil(clp);
+  G('prof-icon').textContent = p.icon;
+  G('prof-name').textContent = p.nom;
+  G('prof-desc').textContent = p.desc;
+  G('prof-prev').classList.remove('hidden');
+}
+
+/* ══════════════════════════════════════════
+   INICIALIZACIÓN — todo aquí, una sola vez
+══════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', function() {
+
+  buildTicker();
+
+  /* Tabs auth */
+  G('tab-login').addEventListener('click', function(){ switchTab('login'); });
+  G('tab-reg').addEventListener('click',   function(){ switchTab('reg');   });
+  G('go-reg').addEventListener('click',    function(e){ e.preventDefault(); switchTab('reg');   });
+  G('go-login').addEventListener('click',  function(e){ e.preventDefault(); switchTab('login'); });
+
+  /* Enter en inputs */
+  ['l-email','l-pass'].forEach(function(id){
+    G(id).addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
+  });
+  ['r-name','r-email','r-pass'].forEach(function(id){
+    G(id).addEventListener('keydown', function(e){ if(e.key==='Enter') doReg(); });
+  });
+
+  /* Botones auth */
+  G('btn-login').addEventListener('click', doLogin);
+  G('btn-reg').addEventListener('click',   doReg);
+
+  /* Logout */
+  G('btn-out1').addEventListener('click', doLogout);
+  G('btn-out2').addEventListener('click', doLogout);
+
+  /* Recalcular */
+  G('btn-back').addEventListener('click', function(){ goScreen('s-invest'); });
+
+  /* Quick amounts */
+  G('quick-btns').addEventListener('click', function(e) {
+    const btn = e.target.closest('.qbtn');
+    if (!btn) return;
+    G('amt').value = btn.dataset.v;
+    G('quick-btns').querySelectorAll('.qbtn').forEach(function(b){ b.classList.remove('on'); });
+    btn.classList.add('on');
+    updatePreview(parseFloat(btn.dataset.v));
+  });
+
+  /* Input amount */
+  G('amt').addEventListener('input', function(){
+    updatePreview(parseFloat(this.value));
+  });
+
+  /* *** BOTÓN CALCULAR *** */
+  G('btn-calc').addEventListener('click', function() {
+    hideErr('amt-err');
+    var raw = parseFloat(G('amt').value);
+    if (!raw || raw < 1000) {
+      showErr('amt-err', 'Ingresa al menos $1.000 CLP para comenzar.');
+      return;
+    }
+    var resultado = calcular(raw);
+    renderDash(resultado);
+    goScreen('s-dash');
+  });
+
+  /* Sesión existente */
+  var sess = getSess();
+  if (sess) {
+    var u = getUsers()[sess];
+    if (u) { loginOk(u); return; }
+  }
+  goScreen('s-auth');
+});
+</script>
+</body>
+</html>
